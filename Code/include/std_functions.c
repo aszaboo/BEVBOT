@@ -4,61 +4,52 @@ This file contains structures, arrays, constants and trivial functions used by B
 
 // constant variables
 const float WHEEL_RAD = 2.75;
+const float TABLE_RADIUS = 10;
 
-// structure
-
+// structures
 typedef struct 
 {
     float index;
-    float x;
-    float y;
+    float r;
+    float theta;
 } TableDictionary;
 
-// TableDicts
+// TableDicts - all points are relative to the base location
 
 // TableDict1
 struct TableDictionary t1;
 t1.index = 1;
-t1.x = 0;
-t1.y = 0;
+t1.r = TABLE_RADIUS;
+t1.theta = 30;
 
 // TableDict2
 struct TableDictionary t2;
 t2.index = 2;
-t2.x = 0;
-t2.y = 0;
+t2.r = TABLE_RADIUS;
+t2.theta = 60;
 
 // TableDict3
 struct TableDictionary t3;
 t3.index = 3;
-t3.x = 0;
-t3.y = 0;
+t3.r = TABLE_RADIUS;
+t3.theta = 90;
 
 // TableDict4
 struct TableDictionary t4;
 t4.index = 4;
-t4.x = 0;
-t4.y = 0;
+t4.r = TABLE_RADIUS;
+t4.theta = 120;
 
 // TableDict5
 struct TableDictionary t5;
 t5.index = 5;
-t5.x = 0;
-t5.y = 0;
+t5.r = TABLE_RADIUS;
+t5.theta = 150;
 
 // Array for storing table locations
 const TableDictionary table_locations[5] = {const& t1, const& t2, const& t3, const& t4, const& t5};
 
 // Trivial functions
-
-// waits for a button to be pressed
-void waitButton(TEV3Buttons button_name)
-{
-	while(!getButtonPress(button_name))
-	{}
-	while(getButtonPress(button_name))
-	{}
-}
 
 //powers both drive motors with the same power
 void drive(int motor_power)
@@ -73,10 +64,46 @@ void driveBoth(int motor_power_A, int motor_power_D)
 }
 
 // drives a distance
+
 void driveDistance(int power, float distance) {
     const int ENC_LIMIT = (distance * 180) / (2 * M_PI * WHEEL_RAD);
     drive(power);
     while (abs(nMotorEncoder[motorA]) < ENC_LIMIT) {}
     drive(0);
 }
+
+void rotateRobot(float const& x, float const& y) {
+    float angle = atan2(y, x) * (180/M_PI);
+    if(angle >= 0) 
+    {
+        driveBoth(-50, 50);
+        while(gyroSensorValue < angle) {}
+        drive(0);
+    }
+
+    else 
+    {
+        driveBoth(50, -50);
+        while(gyroSensorValue > angle) {}
+        drive(0);
+    }
+}
+
+/*
+// waits for a button to be pressed
+void waitButton(TEV3Buttons button_name)
+{
+	while(!getButtonPress(button_name))
+	{}
+	while(getButtonPress(button_name))
+	{}
+}
+*/
+
+/*
+void driveToPoint(float const& x, float const& y) {
+    rotateRobot(x, y);
+    driveDistance(sqrt(pow(x, 2) + pow(y, 2)));
+}
+*/
 
