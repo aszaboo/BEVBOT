@@ -2,18 +2,9 @@
 This file contains all functions and constants used to take orders
 */
 
-// makes a bell noise and delivers the order to the table
-void orderUp(bool touchSensorInput, int tableNumber) {
-        while(!touchSensorInput) {}
-        wait1MSec(200);
-        goToTable(tableNumber);
-    }
-}
-
 // takes the customers order
-takeOrder(int color) 
+void takeOrder() 
 {
-
     string order_kind = " ";
 
     do {
@@ -35,6 +26,15 @@ takeOrder(int color)
 
     } // takeOrder
 
-    displayString(3, order_kind);
-
+    displayString(3, "Please make %f" order_kind);
+    
 }
+
+// makes a bell noise and delivers the order to the table
+void orderUp(bool touchSensorInput, int tableNumber) {
+        while(!touchSensorInput) {}
+        wait1MSec(200);
+        goToTable(tableNumber);
+    }
+}
+

@@ -4,45 +4,40 @@ This file contains structures, arrays, constants and trivial functions used by B
 
 // constant variables
 const float WHEEL_RAD = 2.75;
-const float TABLE_RADIUS = 10;
+const int TABLE_RADIUS = 100;
+const int TIME_OUT = 600000;
 
 // structures
 typedef struct 
 {
-    float index;
     float r;
-    float theta;
+    int theta;
 } TableDictionary;
 
 // TableDicts - all points are relative to the base location
 
 // TableDict1
 struct TableDictionary t1;
-t1.index = 1;
 t1.r = TABLE_RADIUS;
 t1.theta = 30;
 
 // TableDict2
 struct TableDictionary t2;
-t2.index = 2;
 t2.r = TABLE_RADIUS;
 t2.theta = 60;
 
 // TableDict3
 struct TableDictionary t3;
-t3.index = 3;
 t3.r = TABLE_RADIUS;
 t3.theta = 90;
 
 // TableDict4
 struct TableDictionary t4;
-t4.index = 4;
 t4.r = TABLE_RADIUS;
 t4.theta = 120;
 
 // TableDict5
 struct TableDictionary t5;
-t5.index = 5;
 t5.r = TABLE_RADIUS;
 t5.theta = 150;
 
@@ -72,38 +67,41 @@ void driveDistance(int power, float distance) {
     drive(0);
 }
 
-void rotateRobot(float const& x, float const& y) {
-    float angle = atan2(y, x) * (180/M_PI);
-    if(angle >= 0) 
+void rotateRobot(int theta) {
+    if(theta >= 0) 
     {
         driveBoth(-50, 50);
-        while(gyroSensorValue < angle) {}
+        while(getGyroDegrees(s4) < theta) {}
         drive(0);
+        wait1MSec(100);
+        zeroAngle(theta);
     }
 
     else 
     {
         driveBoth(50, -50);
-        while(gyroSensorValue > angle) {}
+        while(getGyroDegrees(s4) > theta) {}
         drive(0);
+        wait1MSec(100);
+        zeroAngle(theta);
     }
 }
 
-/*
-// waits for a button to be pressed
-void waitButton(TEV3Buttons button_name)
+// zero's the robot with reference to the angle theta
+void zeroAngle(int theta)
 {
-	while(!getButtonPress(button_name))
-	{}
-	while(getButtonPress(button_name))
-	{}
-}
-*/
+    if(theta >= 0) 
+    {
+        driveBoth(-5, 5);
+        while(getGyroDegrees(s4) < theta) {}
+        drive(0);
+    }
 
-/*
-void driveToPoint(float const& x, float const& y) {
-    rotateRobot(x, y);
-    driveDistance(sqrt(pow(x, 2) + pow(y, 2)));
+    else 
+    {
+        driveBoth(5, -5);
+        while(getGyroDegrees(s4) > theta) {}
+        drive(0);
+    }
 }
-*/
 
