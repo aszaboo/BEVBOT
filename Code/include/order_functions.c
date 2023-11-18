@@ -31,8 +31,8 @@ void takeOrder()
 }
 
 // makes a bell noise and delivers the order to the table
-void orderUp(bool touchSensorInput, int tableNumber) {
-        while(!touchSensorInput) {}
+void orderUp(int tableNumber) {
+        while(!SensorValue[S1]) {}
         wait1MSec(200);
         goToTable(tableNumber);
     }

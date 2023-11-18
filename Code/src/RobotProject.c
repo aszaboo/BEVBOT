@@ -20,7 +20,15 @@ task main()
         // returining to the table
         returnToBase(table_number);
 
+        // wait for order completion'
+        orderUp(table_number);
+
+        // lifting gripper
         
+
+
+
+
 
 
         
