@@ -24,21 +24,15 @@ task main()
         orderUp(table_number);
 
         // lifting gripper
-        
+        placeDrink();
 
+        // returning to base
+        returnToBase(table_number);
 
-
-
-
-
-        
+        //reset timer
+        ClearTimer(T1);   
     }
     
-
-
-
-
-
 }
 
 
