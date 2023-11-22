@@ -9,11 +9,11 @@ const int LIFT_ENC_VALUE = 1800;
 const int PLACE_CUP_VALUE = 40;
 
 
-void liftGripper(bool up) 
+void liftGripper(bool up)
 {
     int direction = 1;
 
-    if(up) 
+    if(up)
     {
         motor[motorB] = 100;
         while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
@@ -28,7 +28,7 @@ void liftGripper(bool up)
     }
 }
 
-placeDrink()
+void placeDrink()
 {
     liftGripper(1);
     drive(10);

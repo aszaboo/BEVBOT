@@ -1,15 +1,15 @@
-#include <.../include/config.c>
-#include <.../include/drive_functions.c>
-#include <.../include/order_functions.c>
-#include <.../include/std_functions.c>
+#include </../include/config.c>
+#include </../include/location_functions.c>
+#include </../include/order_functions.c>
+#include "UW_sensorMux.c"
 
-task main() 
+task main()
 {
-    while(time1[t1] < TIME_OUT) 
+    while(time1[t1] < TIME_OUT)
     {
         // while there is no IRBeacon signal do nothing
         while(!getIRBeaconDirection(s4)) {}
-        
+
         // locating and driving to table
         table_number = locateTable(getIRBeaconDirection(s4));
         goToTable(table_number, table_locations);
@@ -30,10 +30,7 @@ task main()
         returnToBase(table_number);
 
         //reset timer
-        ClearTimer(T1);   
+        ClearTimer(T1);
     }
-    
+
 }
-
-
-
