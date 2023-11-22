@@ -12,41 +12,14 @@ const int LIFT_ENC_VALUE = 1800;
 const int PLACE_CUP_VALUE = 40;
 
 // structures
-typedef struct 
+typedef struct
 {
     float r;
     int theta;
-} TableDictionary;
+} coordinate;
 
-// TableDicts - all points are relative to the base location
 
-// TableDict1
-struct TableDictionary t1;
-t1.r = TABLE_RADIUS;
-t1.theta = -60;
-
-// TableDict2
-struct TableDictionary t2;
-t2.r = TABLE_RADIUS;
-t2.theta = -30;
-
-// TableDict3
-struct TableDictionary t3;
-t3.r = TABLE_RADIUS;
-t3.theta = 0;
-
-// TableDict4
-struct TableDictionary t4;
-t4.r = TABLE_RADIUS;
-t4.theta = 30;
-
-// TableDict5
-struct TableDictionary t5;
-t5.r = TABLE_RADIUS;
-t5.theta = 60;
-
-// Array for storing table locations
-const TableDictionary table_locations[5] = {const& t1, const& t2, const& t3, const& t4, const& t5};
+const coordinate tableDict[4] = {{TABLE_RADIUS, -60}, {TABLE_RADIUS, -30}, {TABLE_RADIUS, 0}, {TABLE_RADIUS, 30}, {TABLE_RADIUS, 660}}
 
 
 // function prototypes
@@ -75,10 +48,10 @@ void zeroAngle(int theta);
 int locateTable(int beaconSensorValue);
 
 // drives the robot to a table ready to order
-void goToTable(int const& tableNumber, TableDictionary const& tableDict);
+void goToTable(int const& tableNumber, coordinate const& tableDict);
 
 // returns the robot to the base location
-void returnToBase(int tableNumber) 
+void returnToBase(int tableNumber);
 
 // order functions
 
@@ -98,13 +71,13 @@ placeDrink();
 
 // main program
 
-task main() 
+task main()
 {
-    while(time1[t1] < TIME_OUT) 
+    while(time1[t1] < TIME_OUT)
     {
         // while there is no IRBeacon signal do nothing
         while(!getIRBeaconDirection(s4)) {}
-        
+
         // locating and driving to table
         table_number = locateTable(getIRBeaconDirection(s4));
         goToTable(table_number, table_locations);
@@ -125,9 +98,9 @@ task main()
         returnToBase(table_number);
 
         //reset timer
-        ClearTimer(T1);   
+        ClearTimer(T1);
     }
-    
+
 }
 
 // standard functions
@@ -143,7 +116,7 @@ void driveBoth(int motor_power_A, int motor_power_D)
 	motor[motorD] = motor_power_D;
 }
 
-void driveDistance(int power, float distance) 
+void driveDistance(int power, float distance)
 {
     const int ENC_LIMIT = (distance * 180) / (2 * M_PI * WHEEL_RAD);
     drive(power);
@@ -152,7 +125,7 @@ void driveDistance(int power, float distance)
 }
 
 void rotateRobot(int theta) {
-    if(theta >= 0) 
+    if(theta >= 0)
     {
         driveBoth(-50, 50);
         while(getGyroDegrees(s4) < theta) {}
@@ -161,7 +134,7 @@ void rotateRobot(int theta) {
         zeroAngle(theta);
     }
 
-    else 
+    else
     {
         driveBoth(50, -50);
         while(getGyroDegrees(s4) > theta) {}
@@ -173,14 +146,14 @@ void rotateRobot(int theta) {
 
 void zeroAngle(int theta)
 {
-    if(theta >= 0) 
+    if(theta >= 0)
     {
         driveBoth(-5, 5);
         while(getGyroDegrees(s4) < theta) {}
         drive(0);
     }
 
-    else 
+    else
     {
         driveBoth(5, -5);
         while(getGyroDegrees(s4) > theta) {}
@@ -189,7 +162,7 @@ void zeroAngle(int theta)
 }
 
 // location functions
-int locateTable(int beaconSensorValue) 
+int locateTable(int beaconSensorValue)
 {
 
     int table_number = 0;
@@ -212,38 +185,38 @@ int locateTable(int beaconSensorValue)
     return table_number;
 }
 
-void goToTable(int const& tableNumber, TableDictionary const& tableDict) 
+void goToTable(int const& tableNumber, coordinate const& tableDict)
 {
-    
-    if(tableNumber == 1) 
+
+    if(tableNumber == 1)
     {
         rotateRobot(tableDict[0].theta);
         wait1MSec(100);
         driveDistance(80, tableDict[0].r)
-    } 
+    }
 
-    if(tableNumber == 2) 
+    if(tableNumber == 2)
     {
         rotateRobot(tableDict[1].theta);
         wait1MSec(100);
         driveDistance(80, tableDict[1].r)
     }
 
-    if(tableNumber == 3) 
+    if(tableNumber == 3)
     {
         rotateRobot(tableDict[2].theta);
         wait1MSec(100);
         driveDistance(80, tableDict[2].r)
     }
 
-    if(tableNumber == 4) 
+    if(tableNumber == 4)
     {
         rotateRobot(tableDict[3].theta);
         wait1MSec(100);
         driveDistance(80, tableDict[3].r)
     }
 
-    if(tableNumber == 5) 
+    if(tableNumber == 5)
     {
         rotateRobot(tableDict[4].theta);
         wait1MSec(100);
@@ -251,9 +224,9 @@ void goToTable(int const& tableNumber, TableDictionary const& tableDict)
     }
 }
 
-void returnToBase(int tableNumber) 
+void returnToBase(int tableNumber)
 {
-    if(tableNumber == 1) 
+    if(tableNumber == 1)
     {
         rotateRobot(180);
         wait1MSec(100);
@@ -271,7 +244,7 @@ void returnToBase(int tableNumber)
         rotateRobot(-(tableDict[1].theta));
     }
 
-    if(tableNumber == 3) 
+    if(tableNumber == 3)
     {
         rotateRobot(180);
         wait1MSec(100);
@@ -280,7 +253,7 @@ void returnToBase(int tableNumber)
         rotateRobot(-(tableDict[2].theta));
     }
 
-    if(tableNumber == 4) 
+    if(tableNumber == 4)
     {
         rotateRobot(180);
         wait1MSec(100);
@@ -289,7 +262,7 @@ void returnToBase(int tableNumber)
         rotateRobot(-(tableDict[3].theta));
     }
 
-    if(tableNumber == 5) 
+    if(tableNumber == 5)
     {
         rotateRobot(180);
         wait1MSec(100);
@@ -301,7 +274,7 @@ void returnToBase(int tableNumber)
 
 
 // order functions
-void takeOrder() 
+void takeOrder()
 {
     string order_kind = " ";
 
@@ -315,7 +288,7 @@ void takeOrder()
     else if(SensorValue[S3] = (int)colorBlue)
     order_kind = "Raspberry Lemonade";
 
-    else if(SensorValue[S3] = (int)colorYellow)  
+    else if(SensorValue[S3] = (int)colorYellow)
     order_kind = "Lemonade";
 
     else displayString(3, "Not a valid order type");
@@ -325,7 +298,7 @@ void takeOrder()
     } // takeOrder
 
     displayString(3, "Please make %f" order_kind);
-    
+
 }
 
 void orderUp(int tableNumber) {
@@ -336,11 +309,11 @@ void orderUp(int tableNumber) {
 }
 
 // gripper functions
-void liftGripper(bool up) 
+void liftGripper(bool up)
 {
     int direction = 1;
 
-    if(up) 
+    if(up)
     {
         motor[motorB] = 100;
         while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
@@ -370,6 +343,3 @@ placeDrink()
     driveDistance(-10, 100)
     liftGripper(0);
 }
-
-
-
