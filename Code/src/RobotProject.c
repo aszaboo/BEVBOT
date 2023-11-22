@@ -2,7 +2,7 @@
 
 // Driving Constants
 const float WHEEL_RAD = 2.75;
-const int TABLE_RADIUS = 100;
+const int TABLE_RADIUS = 100.0;
 const int TIME_OUT = 600000;
 
 // Gripper constants
@@ -19,7 +19,7 @@ typedef struct
 } coordinate;
 
 
-const coordinate tableDict[4] = {{TABLE_RADIUS, -60}, {TABLE_RADIUS, -30}, {TABLE_RADIUS, 0}, {TABLE_RADIUS, 30}, {TABLE_RADIUS, 660}}
+const coordinate tableDict[4] = {{TABLE_RADIUS, -60}, {TABLE_RADIUS, -30}, {TABLE_RADIUS, 0}, {TABLE_RADIUS, 30}, {TABLE_RADIUS, 60}};
 
 
 // function prototypes
@@ -48,7 +48,7 @@ void zeroAngle(int theta);
 int locateTable(int beaconSensorValue);
 
 // drives the robot to a table ready to order
-void goToTable(int const& tableNumber, coordinate const& tableDict);
+void goToTable(const int tableNumber, const coordinate & tableDict);
 
 // returns the robot to the base location
 void returnToBase(int tableNumber);
@@ -67,20 +67,20 @@ void orderUp(int tableNumber);
 void liftGripper(bool up);
 
 // places the drink on the table
-placeDrink();
+void placeDrink();
 
 // main program
 
 task main()
 {
-    while(time1[t1] < TIME_OUT)
+    while(time1[T1] < TIME_OUT)
     {
         // while there is no IRBeacon signal do nothing
-        while(!getIRBeaconDirection(s4)) {}
+        while(!getIRBeaconDirection(S4)) {}
 
         // locating and driving to table
-        table_number = locateTable(getIRBeaconDirection(s4));
-        goToTable(table_number, table_locations);
+        int table_number = locateTable(getIRBeaconDirection(S4));
+        goToTable(table_number, tableDict);
 
         // taking the customers order
         takeOrder();
@@ -98,7 +98,7 @@ task main()
         returnToBase(table_number);
 
         //reset timer
-        ClearTimer(T1);
+        clearTimer(T1);
     }
 
 }
@@ -118,7 +118,7 @@ void driveBoth(int motor_power_A, int motor_power_D)
 
 void driveDistance(int power, float distance)
 {
-    const int ENC_LIMIT = (distance * 180) / (2 * M_PI * WHEEL_RAD);
+    const int ENC_LIMIT = (distance * 180) / (2 * PI * WHEEL_RAD);
     drive(power);
     while (abs(nMotorEncoder[motorA]) < ENC_LIMIT) {}
     drive(0);
@@ -128,18 +128,18 @@ void rotateRobot(int theta) {
     if(theta >= 0)
     {
         driveBoth(-50, 50);
-        while(getGyroDegrees(s4) < theta) {}
+        while(getGyroDegrees(S4) < theta) {}
         drive(0);
-        wait1MSec(100);
+        wait1Msec(100);
         zeroAngle(theta);
     }
 
     else
     {
         driveBoth(50, -50);
-        while(getGyroDegrees(s4) > theta) {}
+        while(getGyroDegrees(S4) > theta) {}
         drive(0);
-        wait1MSec(100);
+        wait1Msec(100);
         zeroAngle(theta);
     }
 }
@@ -149,19 +149,20 @@ void zeroAngle(int theta)
     if(theta >= 0)
     {
         driveBoth(-5, 5);
-        while(getGyroDegrees(s4) < theta) {}
+        while(getGyroDegrees(S4) < theta) {}
         drive(0);
     }
 
     else
     {
         driveBoth(5, -5);
-        while(getGyroDegrees(s4) > theta) {}
+        while(getGyroDegrees(S4) > theta) {}
         drive(0);
     }
 }
 
 // location functions
+
 int locateTable(int beaconSensorValue)
 {
 
@@ -185,9 +186,8 @@ int locateTable(int beaconSensorValue)
     return table_number;
 }
 
-void goToTable(int const& tableNumber, coordinate const& tableDict)
-{
 
+void goToTable (const int tableNumber, const coordinate & tableDict[]) {
     if(tableNumber == 1)
     {
         rotateRobot(tableDict[0].theta);
@@ -328,7 +328,7 @@ void liftGripper(bool up)
     }
 }
 
-placeDrink()
+void placeDrink()
 {
     liftGripper(1);
     drive(10);
