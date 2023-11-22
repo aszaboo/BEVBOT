@@ -6,7 +6,8 @@ This file contains table coordinates and functions for traversing to each table 
 #include <.../include/std_functions>
 
 // determines the table number with the active beacon
-int locateTable(int beaconSensorValue) {
+int locateTable(int beaconSensorValue) 
+{
 
     int table_number = 0;
 
@@ -29,7 +30,8 @@ int locateTable(int beaconSensorValue) {
 }
 
 // drives the robot to a table ready to order
-void goToTable(int const& tableNumber, TableDictionary const& tableDict) {
+void goToTable(int const& tableNumber, TableDictionary const& tableDict) 
+{
     
     if(tableNumber == 1) 
     {
@@ -68,7 +70,8 @@ void goToTable(int const& tableNumber, TableDictionary const& tableDict) {
 }
 
 // returns the robot to the base location
-void returnToBase(int tableNumber) {
+void returnToBase(int tableNumber) 
+{
     if(tableNumber == 1) 
     {
         rotateRobot(180);
