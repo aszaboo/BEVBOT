@@ -43,7 +43,5 @@ void configureAllSensors()
 	SensorMode[S3] = modeEV3Color_Color;
 	wait1Msec(50);
 	SensorType[S4] = sensorEV3_Gyro;
-
-
     // SensorType[S4] = sensorEV3_IR;
 }

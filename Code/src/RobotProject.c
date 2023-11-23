@@ -11,15 +11,8 @@ const float GRIPPER_LENGTH = 6.75;
 const int LIFT_ENC_VALUE = 1800;
 const int PLACE_CUP_VALUE = 40;
 
-// structures
-typedef struct
-{
-    float r;
-    int theta;
-} coordinate;
 
-
-coordinate tableDict[5] = {{TABLE_RADIUS, -60}, {TABLE_RADIUS, -30}, {TABLE_RADIUS, 0}, {TABLE_RADIUS, 30}, {TABLE_RADIUS, 60}};
+int tableDict[10] = {TABLE_RADIUS, -60, TABLE_RADIUS, -30, TABLE_RADIUS, 0, TABLE_RADIUS, 30, TABLE_RADIUS, 60};
 
 
 // function prototypes
@@ -48,7 +41,7 @@ void zeroAngle(int theta);
 int locateTable(int beaconSensorValue);
 
 // drives the robot to a table ready to order
-void goToTable(const int tableNumber, coordinate* tableDict);
+void goToTable(const int tableNumber, int* tableDict);
 
 // returns the robot to the base location
 void returnToBase(int tableNumber);
@@ -59,7 +52,7 @@ void returnToBase(int tableNumber);
 void takeOrder();
 
 // makes a bell noise and delivers the order to the table
-void orderUp(int tableNumber, coordinate* tableDict);
+void orderUp(int tableNumber, int* tableDict);
 
 // gripper functions
 
@@ -187,90 +180,22 @@ int locateTable(int beaconSensorValue)
 }
 
 
-void goToTable(const int tableNumber, coordinate* tableDict) {
-    if(tableNumber == 1)
-    {
-        rotateRobot(tableDict[0].theta);
-        wait1Msec(100);
-        driveDistance(80, tableDict[0].r);
-    }
-
-    if(tableNumber == 2)
-    {
-        rotateRobot(tableDict[1].theta);
-        wait1Msec(100);
-        driveDistance(80, tableDict[1].r);
-    }
-
-    if(tableNumber == 3)
-    {
-        rotateRobot(tableDict[2].theta);
-        wait1Msec(100);
-        driveDistance(80, tableDict[2].r);
-    }
-
-    if(tableNumber == 4)
-    {
-        rotateRobot(tableDict[3].theta);
-        wait1Msec(100);
-        driveDistance(80, tableDict[3].r);
-    }
-
-    if(tableNumber == 5)
-    {
-        rotateRobot(tableDict[4].theta);
-        wait1Msec(100);
-        driveDistance(80, tableDict[4].r);
-    }
+void goToTable(const int tableNumber, int* tableDict) {
+    rotateRobot(tableDict[1+2*tableNumber]);
+    wait1Msec(100);
+    driveDistance(80, tableDict[+2*tableNumber]);
 }
 
 void returnToBase(int tableNumber)
 {
-    if(tableNumber == 1)
-    {
         rotateRobot(180);
         wait1Msec(100);
-        driveDistance(80, tableDict[4].r);
+        driveDistance(80, tableDict[0+2*tableNumber]);
         wait1Msec(100);
-        rotateRobot(-(tableDict[0].theta));
-    }
-
-    if(tableNumber == 2)
-    {
-        rotateRobot(180);
-        wait1Msec(100);
-        driveDistance(80, tableDict[4].r);
-        wait1Msec(100);
-        rotateRobot(-(tableDict[1].theta));
-    }
-
-    if(tableNumber == 3)
-    {
-        rotateRobot(180);
-        wait1Msec(100);
-        driveDistance(80, tableDict[4].r);
-        wait1Msec(100);
-        rotateRobot(-(tableDict[2].theta));
-    }
-
-    if(tableNumber == 4)
-    {
-        rotateRobot(180);
-        wait1Msec(100);
-        driveDistance(80, tableDict[4].r);
-        wait1Msec(100);
-        rotateRobot(-(tableDict[3].theta));
-    }
-
-    if(tableNumber == 5)
-    {
-        rotateRobot(180);
-        wait1Msec(100);
-        driveDistance(80, tableDict[4].r);
-        wait1Msec(100);
-        rotateRobot(-(tableDict[4].theta));
-    }
+        rotateRobot(-(tableDict[1+2*tableNumber]));
 }
+
+
 
 
 // order functions
@@ -294,7 +219,7 @@ void takeOrder()
 }
 
 
-void orderUp(int tableNumber, coordinate* tableDict) {
+void orderUp(int tableNumber, int* tableDict) {
         while(!SensorValue[S1])
         	{}
         wait1Msec(200);
