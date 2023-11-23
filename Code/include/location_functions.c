@@ -116,5 +116,21 @@ void returnToBase(int tableNumber)
         wait1MSec(100);
         rotateRobot(-(tableDict[4].theta));
     }
+
 }
 
+void obstacle(int Pow, int dist, int Fulldist) 
+{
+	nMotorEncoder[motorC] = 0;
+	
+	while(nMotorEncoder[motorC] < Fulldist)
+	{
+    if(SensorValue(S3) > dist) {
+        motor[motorC] = motor[motorD] = Pow;
+    }
+   else
+   {
+     motor[motorC] = motor[motorD] = 0;
+ 	 }
+ }
+}
