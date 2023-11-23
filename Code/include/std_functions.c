@@ -62,7 +62,7 @@ void driveBoth(int motor_power_A, int motor_power_D)
 
 void driveDistance(int power, float distance) 
 {
-    const int ENC_LIMIT = (distance * 180) / (2 * M_PI * WHEEL_RAD);
+    const int ENC_LIMIT = (distance * 180) / (2 * PI * WHEEL_RAD);
     drive(power);
     while (abs(nMotorEncoder[motorA]) < ENC_LIMIT) {}
     drive(0);

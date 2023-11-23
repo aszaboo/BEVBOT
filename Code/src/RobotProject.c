@@ -144,35 +144,48 @@ void returnToBase(int tableNumber)
         drive(180+tableDict[1+2*tableNumber], tableDict[2*tableNumber], 60);
 }
 
-
-
-
-// order functions
-void takeOrder()
+// takes a persons order and returns the order as a string
+string takeOrder()
 {
-    string order_kind = " ";
 
-    do {
-    	displayString(3, "Please scan your order");
-			if(SensorValue[S3] == (int)colorRed)
-    		order_kind = "Coke";
+    string order_kind;
 
-    	else if(SensorValue[S3] == (int)colorBlue)
-    		order_kind = "Raspberry Lemonade";
+    displayString(3, "Please scan your order");
 
-    	else if(SensorValue[S3] == (int)colorYellow)
-    		order_kind = "Lemonade";
-    	else displayString(3, "Not a valid order type");
-    } while(order_kind == " ");
-    displayString(3, "Please make %f");
+    do 
+    {
+    if(SensorValue[S1] == (int)colorRed) {
+    order_kind = "Coke";
+    }
+    else if(SensorValue[S1] == (int)colorBlue)
+    {
+    order_kind = "Raspberry Lemonade";
+    }
+    else if(SensorValue[S1] == (int)colorYellow)
+    {
+    order_kind = "Lemonade";
+    }
+    else
+    displayString(3, "Sorry we do not have that drink");
+    } while (order_kind != "Coke" || order_kind != "Raspberry Lemonade" || order_kind != "Lemonade");
+      
+    return order_kind;
+    
 }
 
 
-void orderUp(int tableNumber, int* tableDict) {
-        while(!SensorValue[S1])
-        	{}
-        wait1Msec(200);
-        goToTable(tableNumber, tableDict);
+// makes a and delivers the order to the table
+void orderUp(int tableNumber, string order_kind) 
+{
+        // wait for enter button to be released (p2)
+	while(!getButtonPress(buttonEnter)) 
+  {
+    displayString(3, "%s", order_kind);
+	}
+
+	while(getButtonPress(buttonEnter)) {}
+  wait1MSec(200);
+  goToTable(tableNumber);
 }
 
 // gripper functions
