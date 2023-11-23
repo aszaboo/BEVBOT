@@ -19,20 +19,9 @@ int tableDict[10] = {TABLE_RADIUS, -60, TABLE_RADIUS, -30, TABLE_RADIUS, 0, TABL
 
 // standard functions
 
-//powers both drive motors with the same power
-void drive(int motor_power);
+//drives in a given heading, for a given distance, with given standard motor duty.
+void drive(int heading, int distance, int speed);
 
-//powers both motors independently
-void driveBoth(int motor_power_A, int motor_power_D);
-
-// drives a distance
-void driveDistance(int power, float distance);
-
-// rotates the robot by an angle of theta
-void rotateRobot(int theta);
-
-// zero's the robot with reference to the angle theta
-void zeroAngle(int theta);
 
 // location functions
 
@@ -57,7 +46,7 @@ void orderUp(int tableNumber, int* tableDict);
 // gripper functions
 
 // lifts the gripper up or down
-void liftGripper(bool up);
+void liftGripper(bool dir);
 
 // places the drink on the table
 void placeDrink();
@@ -98,60 +87,26 @@ task main()
 
 // standard functions
 
-void drive(int motor_power)
+void drive(int heading, int distance, int speed)
 {
-	motor[motorA] = motor[motorD] = motor_power;
-}
+	float duty = speed;
 
-void driveBoth(int motor_power_A, int motor_power_D)
-{
-	motor[motorA] = motor_power_A;
-	motor[motorD] = motor_power_D;
-}
+	float Kp =	2;
 
-void driveDistance(int power, float distance)
-{
-    const int ENC_LIMIT = (distance * 180) / (2 * PI * WHEEL_RAD);
-    drive(power);
-    while (abs(nMotorEncoder[motorA]) < ENC_LIMIT) {}
-    drive(0);
-}
+	float error;
 
-void rotateRobot(int theta) {
-    if(theta >= 0)
-    {
-        driveBoth(-50, 50);
-        while(getGyroDegrees(S4) < theta) {}
-        drive(0);
-        wait1Msec(100);
-        zeroAngle(theta);
-    }
+	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
+	{
+		error=getGyroDegrees(S2)-heading;
 
-    else
-    {
-        driveBoth(50, -50);
-        while(getGyroDegrees(S4) > theta) {}
-        drive(0);
-        wait1Msec(100);
-        zeroAngle(theta);
-    }
-}
+		float correction = (Kp*error)*-1;
+		float power_left = -(duty + correction);
+		float power_right = -(duty - correction);
 
-void zeroAngle(int theta)
-{
-    if(theta >= 0)
-    {
-        driveBoth(-5, 5);
-        while(getGyroDegrees(S4) < theta) {}
-        drive(0);
-    }
+		motor[motorC] = power_left;
+		motor[motorD] = power_right;
 
-    else
-    {
-        driveBoth(5, -5);
-        while(getGyroDegrees(S4) > theta) {}
-        drive(0);
-    }
+	}
 }
 
 // location functions
@@ -181,18 +136,12 @@ int locateTable(int beaconSensorValue)
 
 
 void goToTable(const int tableNumber, int* tableDict) {
-    rotateRobot(tableDict[1+2*tableNumber]);
-    wait1Msec(100);
-    driveDistance(80, tableDict[+2*tableNumber]);
+	drive(tableDict[1+2*tableNumber], tableDict[2*tableNumber], 60);
 }
 
 void returnToBase(int tableNumber)
 {
-        rotateRobot(180);
-        wait1Msec(100);
-        driveDistance(80, tableDict[0+2*tableNumber]);
-        wait1Msec(100);
-        rotateRobot(-(tableDict[1+2*tableNumber]));
+        drive(180+tableDict[1+2*tableNumber], tableDict[2*tableNumber], 60);
 }
 
 
@@ -227,11 +176,11 @@ void orderUp(int tableNumber, int* tableDict) {
 }
 
 // gripper functions
-void liftGripper(bool up)
+void liftGripper(bool dir)
 {
     int direction = 1;
 
-    if(up)
+    if(dir)
     {
         motor[motorB] = 100;
         while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
@@ -248,16 +197,10 @@ void liftGripper(bool up)
 
 void placeDrink()
 {
-    liftGripper(1);
-    drive(10);
-    while(SensorValue[S3] > (DIST_TO_GRIPPER - GRIPPER_LENGTH)) {}
-    drive(0);
+    liftGripper(true);
     motor[motorB] = -10;
     while(nMotorEncoder[motorB] < LIFT_ENC_VALUE - PLACE_CUP_VALUE) {}
     motor[motorB] = 0;
     wait1Msec(100);
-    motor[motorC] = -10;
-    wait1Msec(100);
-    driveDistance(-10, 100);
-    liftGripper(0);
+    liftGripper(false);
 }
