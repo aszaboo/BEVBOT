@@ -12,7 +12,8 @@ string takeOrder()
 
     do 
     {
-    if(SensorValue[S1] == (int)colorRed) {
+    if(SensorValue[S1] == (int)colorRed) 
+    {
     order_kind = "Coke";
     }
     else if(SensorValue[S1] == (int)colorBlue)
@@ -25,6 +26,7 @@ string takeOrder()
     }
     else
     displayString(3, "Sorry we do not have that drink");
+
     } while (order_kind != "Coke" || order_kind != "Raspberry Lemonade" || order_kind != "Lemonade");
       
     return order_kind;
