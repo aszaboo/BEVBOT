@@ -33,17 +33,16 @@ string takeOrder()
 
 
 // makes a bell noise and delivers the order to the table
-void orderUp(int tableNumber, string order_kind) {
+void orderUp(int tableNumber, string order_kind) 
+{
         // wait for enter button to be released (p2)
 	while(!getButtonPress(buttonEnter)) 
   {
     displayString(3, "%s", order_kind);
 	}
 
-	while(getButtonPress(buttonEnter)) {
-	}
-        wait1MSec(200);
-        goToTable(tableNumber);
-    }
+	while(getButtonPress(buttonEnter)) {}
+  wait1MSec(200);
+  goToTable(tableNumber);
 }
 
