@@ -1,4 +1,4 @@
-const int TABLE_RADIUS = 100.0;
+const int TABLE_RADIUS = 60.0;
 const int TIME_OUT = 600000;
 const int LIFT_ENC_VALUE = 20000;
 const int OPEN_ENC_VALUE = 3000;
@@ -77,11 +77,11 @@ task main()
 int locateTable(int beaconSensorValue)
 {
 	if (beaconSensorValue < -9)
-		return 2;
+		return 4;
 	if (beaconSensorValue > 9)
-		return 1;
+		return 0;
 	else
-		return 1;
+		return 2;
 }
 
 
@@ -122,12 +122,12 @@ char* takeOrder()
 void orderUp(int tableNumber, char* order_kind, int* tableDict)
 {
 	// wait for enter button to be released (p2)
-	while(!getButtonPress(buttonEnter) && SensorValue[S1] != (int)colorBlack)
+	while(SensorValue[S1] != (int)colorBlack)
 	{
 		displayString(3, order_kind);
 	}
 
-	while(getButtonPress(buttonEnter) || SensorValue[S1] != (int)colorBlack) {}
+	while(SensorValue[S1] = (int)colorBlack) {}
 	openGripper(false);
 	wait1Msec(200);
 	goToTable(tableNumber, tableDict);
