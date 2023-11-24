@@ -32,10 +32,11 @@ int locateTable(int beaconSensorValue);
 // order functions
 
 // takes the customers order
-void takeOrder();
+char* takeOrder();
+
 
 // makes a bell noise and delivers the order to the table
-void orderUp(int tableNumber, int* tableDict);
+void orderUp(int tableNumber, char* order_kind, int* tableDict);
 
 // gripper functions
 
@@ -59,13 +60,13 @@ task main()
         goToTable(table_number, tableDict);
 
         // taking the customers order
-        takeOrder();
+        char* order = takeOrder();
 
         // returining to the table
         returnToBase(table_number, tableDict);
 
         // wait for order completion'
-        orderUp(table_number, tableDict);
+        orderUp(table_number, order, tableDict);
 
         // lifting gripper
         placeDrink();
@@ -107,25 +108,28 @@ int locateTable(int beaconSensorValue)
 }
 
 // takes a persons order and returns the order as a string
-string takeOrder()
+char* takeOrder()
 {
 
     string order_kind;
 
-    displayString(3, "Please scan your order");
+    displayString(3, "Please scan your order.");
+    displayString(4, "Red: Coffee");
+    displayString(5, "Blue: Margherita");
+    displayString(6, "Yellow: Dr Pepper");
 
     do
     {
     if(SensorValue[S1] == (int)colorRed) {
-    order_kind = "Coke";
+    order_kind = "Coffee";
     }
     else if(SensorValue[S1] == (int)colorBlue)
     {
-    order_kind = "Raspberry Lemonade";
+    order_kind = "Margherita";
     }
     else if(SensorValue[S1] == (int)colorYellow)
     {
-    order_kind = "Lemonade";
+    order_kind = "Dr Pepper";
     }
     else
     displayString(3, "Sorry we do not have that drink");
@@ -137,7 +141,7 @@ string takeOrder()
 
 
 // makes a and delivers the order to the table
-void orderUp(int tableNumber, string order_kind, int* tableDict)
+void orderUp(int tableNumber, char* order_kind, int* tableDict)
 {
         // wait for enter button to be released (p2)
 	while(!getButtonPress(buttonEnter))
