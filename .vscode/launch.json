@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "console": "externalTerminal",
-      "cwd": "c:/Users/aszab/Projects/BEVBOT/current_branch/BEVBOT/Code/src",
-      "program": "c:/Users/aszab/Projects/BEVBOT/current_branch/BEVBOT/Code/src/build/Debug/outDebug"
+      "cwd": "c:/Users/aszab/Projects/BEVBOT/current_branch/BEVBOT/Code/include",
+      "program": "c:/Users/aszab/Projects/BEVBOT/current_branch/BEVBOT/Code/include/build/Debug/outDebug"
     }
   ]
 }

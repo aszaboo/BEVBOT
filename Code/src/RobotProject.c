@@ -132,8 +132,12 @@ char* takeOrder()
     order_kind = "Dr Pepper";
     }
     else
+	{
     displayString(3, "Sorry we do not have that drink");
-    } while (order_kind != "Coke" || order_kind != "Raspberry Lemonade" || order_kind != "Lemonade");
+	wait1Msec(1000);
+	}
+	
+    } while (order_kind != "Coffee" || order_kind != "Margherita" || order_kind != "Dr Pepper");
 
     return order_kind;
 
