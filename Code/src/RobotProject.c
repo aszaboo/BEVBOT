@@ -1,52 +1,21 @@
-
-
-// Driving Constants
 const float WHEEL_RAD = 2.75;
 const int TABLE_RADIUS = 100.0;
 const int TIME_OUT = 600000;
-
-// Gripper constants
 const int LIFT_ENC_VALUE = 20000;
 const int OPEN_ENC_VALUE = 3000;
 
 int tableDict[6] = {TABLE_RADIUS, -60, TABLE_RADIUS, 0, TABLE_RADIUS, 60};
 
-
-// function prototypes
-
-// standard functions
 void drive(int heading, int distance, int speed);
 void goToTable(const int tableNumber, int* tableDict);
 void returnToBase(const int tableNumber, int*tableDict);
 void rotate(int heading);
-
-// location functions
-
-// determines the table number with the active beacon
-
 int locateTable(int beaconSensorValue);
-
-// order functions
-
-// takes the customers order
 char* takeOrder();
-
-
-// makes a bell noise and delivers the order to the table
 void orderUp(int tableNumber, char* order_kind, int* tableDict);
-
-// gripper functions
-
-// lifts the gripper up or down
 void liftGripper(bool dir);
-
-// opens gripper
 void openGripper(bool open);
-
-// places the drink on the table
 void placeDrink();
-
-// main program
 
 task main()
 {
@@ -80,9 +49,6 @@ task main()
 
 }
 
-// standard functions
-
-// location functions
 
 int locateTable(int beaconSensorValue)
 {
@@ -107,7 +73,7 @@ int locateTable(int beaconSensorValue)
     return table_number;
 }
 
-// takes a persons order and returns the order as a string
+
 char* takeOrder()
 {
 
@@ -140,7 +106,6 @@ char* takeOrder()
     } while (order_kind != "Coffee" || order_kind != "Margherita" || order_kind != "Dr Pepper");
 
     return order_kind;
-
 }
 
 
@@ -164,18 +129,17 @@ void liftGripper(bool up)
 {
 	if(up)
 	{
-	nMotorEncoder[motorB] = 0;
-	motor[motorB] = 100;
-	while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
-	motor[motorB] = 0;
-}
+		nMotorEncoder[motorB] = 0;
+		motor[motorB] = 100;
+		while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
+		motor[motorB] = 0;
+	}
 	else if(!up)
 	{
-	motor[motorB] = -100;
-	while(nMotorEncoder[motorB] > LIFT_ENC_VALUE) {}
-	motor[motorB] = 0;
-}
-
+		motor[motorB] = -100;
+		while(nMotorEncoder[motorB] > LIFT_ENC_VALUE) {}
+		motor[motorB] = 0;
+	}
 }
 
 void openGripper(bool open)
@@ -197,7 +161,6 @@ void openGripper(bool open)
 
 }
 
-
 void placeDrink()
 {
     liftGripper(0);
@@ -206,25 +169,21 @@ void placeDrink()
 	wait1Msec(100);
 }
 
-
-
 void drive(int heading, int distance, int speed)
 {
 
 	nMotorEncoder[motorC] = nMotorEncoder[motorD] = 0;
-	float duty = speed;
 
 	const float Kp =	0.5;
-
 	float error;
 
 	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
 	{
-		error=getGyroHeading(S2)-heading;
+		error = getGyroHeading(S2)-heading;
 
 		float correction = (Kp*error)*-1;
-		float power_left = -(duty + correction);
-		float power_right = -(duty - correction);
+		float power_left = -(speed + correction);
+		float power_right = -(speed - correction);
 
 		if (SensorValue[S3] < 15)
 			motor[motorC] = motor[motorD] = 0;
@@ -234,8 +193,6 @@ void drive(int heading, int distance, int speed)
 		motor[motorC] = power_left;
 		motor[motorD] = power_right;
 	  }
-
-
 	}
 	motor[motorC] = motor[motorD] = 0;
 }
@@ -244,8 +201,6 @@ void reverse(int heading, int distance, int speed)
 {
 
 	nMotorEncoder[motorC] = nMotorEncoder[motorD] = 0;
-	float duty = speed;
-
 	const float Kp =	0.5;
 
 	float error;
@@ -253,21 +208,18 @@ void reverse(int heading, int distance, int speed)
 	bool obstacle = false;
 	while (((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI) && !obstacle)
 	{
-		error= -(getGyroHeading(S2)-heading);
-
+		error = -(getGyroHeading(S2)-heading);
 		float correction = (Kp*error)*-1;
-		float power_left = duty + correction;
-		float power_right = duty - correction;
+		float power_left = speed + correction;
+		float power_right = speed - correction;
 
 		if (SensorValue[S3] < 15)
 			motor[motorC] = motor[motorD] = 0;
-
 		else
 		{
-		motor[motorC] = power_left;
-		motor[motorD] = power_right;
-	  }
-
+			motor[motorC] = power_left;
+			motor[motorD] = power_right;
+	  	}
 	}
 	motor[motorC] = motor[motorD] = 0;
 }
