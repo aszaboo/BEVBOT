@@ -19,122 +19,111 @@ void placeDrink();
 
 task main()
 {
-    while(time1[T1] < TIME_OUT)
-    {
-        // while there is no IRBeacon signal do nothing
-        while(!getIRBeaconDirection(S4)) {}
+	while(time1[T1] < TIME_OUT)
+	{
+		// while there is no IRBeacon signal do nothing
+		while(!getIRBeaconDirection(S4)) {}
 
-        // locating and driving to table
-        int table_number = locateTable(getIRBeaconDirection(S4));
-        goToTable(table_number, tableDict);
+		// locating and driving to table
+		int table_number = locateTable(getIRBeaconDirection(S4));
+		goToTable(table_number, tableDict);
 
-        // taking the customers order
-        char* order = takeOrder();
+		// taking the customers order
+		char* order = takeOrder();
 
-        // returining to the table
-        returnToBase(table_number, tableDict);
+		// returining to the table
+		returnToBase(table_number, tableDict);
 
-        // wait for order completion'
-        orderUp(table_number, order, tableDict);
+		// wait for order completion'
+		orderUp(table_number, order, tableDict);
 
-        // lifting gripper
-        placeDrink();
+		// lifting gripper
+		placeDrink();
 
-        // returning to base
-        returnToBase(table_number, tableDict);
+		// returning to base
+		returnToBase(table_number, tableDict);
 
-        //reset timer
-        clearTimer(T1);
-    }
+		liftGripper(1);
 
+		//reset timer
+		clearTimer(T1);
+	}
+	return;
 }
 
 
 int locateTable(int beaconSensorValue)
 {
-
-    int table_number = 0;
-
-    if(beaconSensorValue >= 15)
-        table_number = 1;
-
-    else if(beaconSensorValue >= 5)
-        table_number = 2;
-
-    else if(beaconSensorValue >= -5)
-        table_number = 3;
-
-    else if(beaconSensorValue >= -15)
-        table_number = 4;
-
-    else
-        table_number = 5;
-
-    return table_number;
+	if (beaconSensorValue < -9)
+		return 0;
+	if (beaconSensorValue > 9)
+		return 2;
+	else
+		return 1;
 }
 
 
 char* takeOrder()
 {
 
-    string order_kind;
+	string order_kind;
 
-    displayString(3, "Please scan your order.");
-    displayString(4, "Red: Coffee");
-    displayString(5, "Blue: Margherita");
-    displayString(6, "Yellow: Dr Pepper");
+	displayString(3, "Please scan your order.");
+	displayString(4, "Red: Coffee");
+	displayString(5, "Blue: Margherita");
+	displayString(6, "Yellow: Dr Pepper");
 
-    do
-    {
-    if(SensorValue[S1] == (int)colorRed) {
-    order_kind = "Coffee";
-    }
-    else if(SensorValue[S1] == (int)colorBlue)
-    {
-    order_kind = "Margherita";
-    }
-    else if(SensorValue[S1] == (int)colorYellow)
-    {
-    order_kind = "Dr Pepper";
-    }
-    else
+	do
 	{
-    displayString(3, "Sorry we do not have that drink");
-	wait1Msec(1000);
-	}
-	
-    } while (order_kind != "Coffee" || order_kind != "Margherita" || order_kind != "Dr Pepper");
+		if(SensorValue[S1] == (int)colorRed) {
+			order_kind = "Coffee";
+		}
+		else if(SensorValue[S1] == (int)colorBlue)
+		{
+			order_kind = "Margherita";
+		}
+		else if(SensorValue[S1] == (int)colorYellow)
+		{
+			order_kind = "Dr Pepper";
+		}
+		else
+		{
+			displayString(3, "Sorry we do not have that drink");
+			wait1Msec(1000);
+		}
 
-    return order_kind;
+	} while (order_kind != "Coffee" || order_kind != "Margherita" || order_kind != "Dr Pepper");
+
+	return order_kind;
 }
 
 
 // makes a and delivers the order to the table
 void orderUp(int tableNumber, char* order_kind, int* tableDict)
 {
-        // wait for enter button to be released (p2)
+	// wait for enter button to be released (p2)
 	while(!getButtonPress(buttonEnter))
-  {
-    displayString(3, "%s", order_kind);
+	{
+		displayString(3, "%s", order_kind);
 	}
 
 	while(getButtonPress(buttonEnter)) {}
-  wait1Msec(200);
-  goToTable(tableNumber, tableDict);
+	wait1Msec(200);
+	goToTable(tableNumber, tableDict);
 }
 
 // gripper functions
 
-void liftGripper(bool up)
+void liftGripper(bool dir)
 {
-	if(up)
+	if(dir)
 	{
 		nMotorEncoder[motorB] = 0;
 		motor[motorB] = 100;
 		while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
 		motor[motorB] = 0;
 	}
-	else if(!up)
+	else if(!dir)
 	{
 		motor[motorB] = -100;
 		while(nMotorEncoder[motorB] > LIFT_ENC_VALUE) {}
@@ -163,9 +152,9 @@ void openGripper(bool open)
 
 void placeDrink()
 {
-    liftGripper(0);
+	liftGripper(0);
 	wait1Msec(100);
-    openGripper(1);
+	openGripper(1);
 	wait1Msec(100);
 }
 
@@ -190,9 +179,9 @@ void drive(int heading, int distance, int speed)
 
 		else
 		{
-		motor[motorC] = power_left;
-		motor[motorD] = power_right;
-	  }
+			motor[motorC] = power_left;
+			motor[motorD] = power_right;
+		}
 	}
 	motor[motorC] = motor[motorD] = 0;
 }
@@ -219,7 +208,7 @@ void reverse(int heading, int distance, int speed)
 		{
 			motor[motorC] = power_left;
 			motor[motorD] = power_right;
-	  	}
+		}
 	}
 	motor[motorC] = motor[motorD] = 0;
 }
