@@ -6,11 +6,8 @@ const int TABLE_RADIUS = 100.0;
 const int TIME_OUT = 600000;
 
 // Gripper constants
-const float DIST_TO_GRIPPER = 11.75;
-const float GRIPPER_LENGTH = 6.75;
-const int LIFT_ENC_VALUE = 1800;
-const int PLACE_CUP_VALUE = 40;
-
+const int LIFT_ENC_VALUE = 20000;
+const int OPEN_ENC_VALUE = 3000;
 
 int tableDict[6] = {TABLE_RADIUS, -60, TABLE_RADIUS, 0, TABLE_RADIUS, 60};
 
@@ -42,6 +39,9 @@ void orderUp(int tableNumber, char* order_kind, int* tableDict);
 
 // lifts the gripper up or down
 void liftGripper(bool dir);
+
+// opens gripper
+void openGripper(bool open);
 
 // places the drink on the table
 void placeDrink();
@@ -155,34 +155,53 @@ void orderUp(int tableNumber, char* order_kind, int* tableDict)
 }
 
 // gripper functions
-void liftGripper(bool dir)
+
+void liftGripper(bool up)
 {
-    int direction = 1;
-
-    if(dir)
-    {
-        motor[motorB] = 100;
-        while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
-        motor[motorB] = 0;
-    }
-
-    else
-    {
-        motor[motorB] = -100;
-        while(nMotorEncoder[motorB] > 0) {}
-        motor[motorB] = 0;
-    }
+	if(up)
+	{
+	nMotorEncoder[motorB] = 0;
+	motor[motorB] = 100;
+	while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
+	motor[motorB] = 0;
 }
+	else if(!up)
+	{
+	motor[motorB] = -100;
+	while(nMotorEncoder[motorB] > LIFT_ENC_VALUE) {}
+	motor[motorB] = 0;
+}
+
+}
+
+void openGripper(bool open)
+{
+	if(open)
+	{
+		nMotorEncoder[motorA] = 0;
+		motor[motorA] = 100;
+		while(nMotorEncoder[motorA] < OPEN_ENC_VALUE) {}
+		motor[motorA] = 0;
+	}
+
+	if(!open)
+	{
+		motor[motorA] = -100;
+		while(nMotorEncoder[motorA] > 0) {}
+		motor[motorA] = 0;
+	}
+
+}
+
 
 void placeDrink()
 {
-    liftGripper(true);
-    motor[motorB] = -10;
-    while(nMotorEncoder[motorB] < LIFT_ENC_VALUE - PLACE_CUP_VALUE) {}
-    motor[motorB] = 0;
-    wait1Msec(100);
-    liftGripper(false);
+    liftGripper(0);
+	wait1Msec(100);
+    openGripper(1);
+	wait1Msec(100);
 }
+
 
 
 void drive(int heading, int distance, int speed)
