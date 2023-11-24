@@ -203,8 +203,15 @@ void drive(int heading, int distance, int speed)
 		float power_left = -(duty + correction);
 		float power_right = -(duty - correction);
 
+		if (SensorValue[S3] < 15)
+			motor[motorC] = motor[motorD] = 0;
+
+		else
+		{
 		motor[motorC] = power_left;
 		motor[motorD] = power_right;
+	  }
+
 
 	}
 	motor[motorC] = motor[motorD] = 0;
@@ -220,7 +227,8 @@ void reverse(int heading, int distance, int speed)
 
 	float error;
 
-	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
+	bool obstacle = false;
+	while (((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI) && !obstacle)
 	{
 		error= -(getGyroHeading(S2)-heading);
 
@@ -228,8 +236,14 @@ void reverse(int heading, int distance, int speed)
 		float power_left = duty + correction;
 		float power_right = duty - correction;
 
+		if (SensorValue[S3] < 15)
+			motor[motorC] = motor[motorD] = 0;
+
+		else
+		{
 		motor[motorC] = power_left;
 		motor[motorD] = power_right;
+	  }
 
 	}
 	motor[motorC] = motor[motorD] = 0;
