@@ -1,7 +1,7 @@
 const int TABLE_RADIUS = 60.0;
 const int TIME_OUT = 600000;
 const int LIFT_ENC_VALUE = 20000;
-const int OPEN_ENC_VALUE = 3000;
+const int OPEN_ENC_VALUE = 2500;
 
 void drive(int heading, int distance, int speed);
 void goToTable(const int tableNumber, int* tableDict);
@@ -23,6 +23,7 @@ task main()
 	wait1Msec(50);
 
 	SensorType[S2] = sensorEV3_Gyro;
+	resetGyro(S2);
 	wait1Msec(50);
 	SensorMode[S2] = modeEV3Gyro_Calibration;
 
@@ -39,23 +40,34 @@ task main()
 	SensorMode[S4] = modeEV3IR_Seeker;
 	wait1Msec(1000);
 
-	int tableDict[6] = {60.0, -60, 60.0, 0, 60.0, 60};
-	resetGyro(S2);
+	int tableDict[6] = {50, 40, 50, 0, 50, -40};
 
-	while(!(SensorValue[S1] == (int)colorBlack))
+	while(!(SensorValue[S1] == (int)colorBrown))
 	{
 
 		// while there is no IRBeacon signal do nothing
-		while(getIRBeaconStrength(S4)<5) {}
+		while(getIRBeaconStrength(S4)<5) {if (sensorValue[S1] == (int)colorBrown) return;}
 		int table_number = locateTable(getIRBeaconDirection(S4));
 		goToTable(table_number, tableDict);
+		if (SensorValue[S1] == (int)colorBrown) return;
 		string order = takeOrder();
+		if (SensorValue[S1] == (int)colorBrown) return;
 		returnToBase(table_number, tableDict);
+		if (SensorValue[S1] == (int)colorBrown) return;
+		openGripper(true);
+		if (SensorValue[S1] == (int)colorBrown) return;
+		liftGripper(true);
+		if (SensorValue[S1] == (int)colorBrown) return;
 		orderUp(table_number, order, tableDict);
+		if (SensorValue[S1] == (int)colorBrown) return;
 		placeDrink();
+		if (SensorValue[S1] == (int)colorBrown) return;
 		returnToBase(table_number, tableDict);
-		liftGripper(1);
+		openGripper(false);
+		if (SensorValue[S1] == (int)colorBrown) return;
 		clearTimer(T1);
+		resetGyro(S2);
+		rotate(0);
 	}
 	return;
 }
@@ -63,9 +75,9 @@ task main()
 
 int locateTable(int beaconSensorValue)
 {
-	if (beaconSensorValue < -9)
+	if (beaconSensorValue < -10)
 		return 4;
-	if (beaconSensorValue > 9)
+	else if (beaconSensorValue > 10)
 		return 0;
 	else
 		return 2;
@@ -101,6 +113,7 @@ char* takeOrder()
 	displayString(4, "                   ");
 	displayString(5, "                   ");
 	displayString(6, "                   ");
+	displayString(3, order_kind);
 	return order_kind;
 }
 
@@ -108,16 +121,13 @@ char* takeOrder()
 // makes a and delivers the order to the table
 void orderUp(int tableNumber, char* order_kind, int* tableDict)
 {
+	displayString(3,order_kind);
 	// wait for enter button to be released (p2)
-	while(SensorValue[S1] != (int)colorBlack)
-	{
-		displayString(3, order_kind);
-	}
-
-	while(SensorValue[S1] == (int)colorBlack) {}
+	while(!getButtonPress(ENTER_BUTTON))
+	{}
 	openGripper(false);
 	wait1Msec(200);
-	goToTable(tableNumber, tableDict);
+	drive(tableDict[1+tableNumber], tableDict[tableNumber], 50);
 }
 
 // gripper functions
@@ -128,13 +138,13 @@ void liftGripper(bool dir)
 	{
 		nMotorEncoder[motorB] = 0;
 		motor[motorB] = 100;
-		while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
+		while(nMotorEncoder[motorB] < LIFT_ENC_VALUE && sensorValue[S1] != (int) colorBrown) {}
 		motor[motorB] = 0;
 	}
-	else if(!dir)
+	else
 	{
 		motor[motorB] = -100;
-		while(nMotorEncoder[motorB] > LIFT_ENC_VALUE) {}
+		while(nMotorEncoder[motorB] > 0 && sensorValue[S1] != (int) colorBrown) {}
 		motor[motorB] = 0;
 	}
 }
@@ -145,21 +155,30 @@ void openGripper(bool open)
 	{
 		nMotorEncoder[motorA] = 0;
 		motor[motorA] = 100;
-		while(nMotorEncoder[motorA] < OPEN_ENC_VALUE) {}
+		while(nMotorEncoder[motorA] < OPEN_ENC_VALUE/2 && sensorValue[S1] != (int) colorBrown) {}
+		if (sensorValue[S1] == colorBrown){
+			motor[motorA] = 0;
+			return;
+		}
 		motor[motorA] = 0;
 	}
 
-	if(!open)
+	else
 	{
+		nMotorEncoder[motorA] = 0;
 		motor[motorA] = -100;
-		while(nMotorEncoder[motorA] > 0) {}
+		while(nMotorEncoder[motorA] > -OPEN_ENC_VALUE && sensorValue[S3] != (int) colorBrown) {}
+		if (sensorValue[S1] == colorBrown){
+			motor[motorA] = 0;
+			return;
+		}
 		motor[motorA] = 0;
 	}
 }
 
 void placeDrink()
 {
-	liftGripper(0);
+	liftGripper(false);
 	wait1Msec(100);
 	openGripper(1);
 	wait1Msec(100);
@@ -188,6 +207,8 @@ void drive(int heading, int distance, int speed)
 			motor[motorC] = power_left;
 			motor[motorD] = power_right;
 		}
+
+		if (sensorValue[S1] == (int)colorBrown) return;
 	}
 	motor[motorC] = motor[motorD] = 0;
 }
@@ -195,37 +216,45 @@ void drive(int heading, int distance, int speed)
 void reverse(int heading, int distance, int speed)
 {
 	nMotorEncoder[motorC] = nMotorEncoder[motorD] = 0;
-	const float Kp =	0.7;
+	float duty = speed;
+
+	const float Kp =	0.5;
 
 	float error;
 
-	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
+	bool obstacle = false;
+	while (((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI) && !obstacle)
 	{
-		error = -(getGyroHeading(S2)-heading);
+		error= -(getGyroHeading(S2)-heading);
+
 		float correction = (Kp*error)*-1;
-		float power_left = speed + correction;
-		float power_right = speed - correction;
-		{
-			motor[motorC] = power_left;
-			motor[motorD] = power_right;
-		}
+		float power_left = duty + correction;
+		float power_right = duty - correction;
+		motor[motorC] = power_left;
+		motor[motorD] = power_right;
+		if (sensorValue[S1] == colorBrown) return;
 	}
 	motor[motorC] = motor[motorD] = 0;
 }
 
 void rotate(int heading)
 {
-	motor[motorC] = -20;
-	motor[motorD] = 20;
-	while (getGyroHeading(S2)!= heading)
-	{}
+	if (getGyroHeading(S2) > heading -3 && getGyroHeading(S2) < heading+3)
+		return;
+
+	motor[motorC] = -15;
+	motor[motorD] = 15;
+	while (getGyroHeading(S2) != heading + 5 && getGyroHeading(S2) != heading -5)
+	{
+		if (SensorValue[S1] == colorBrown) return;
+	}
+
 	motor[motorC] = motor[motorD] = 0;
 }
 
 void returnToBase(const int tableNumber, int*tableDict)
 {
-	drive(tableDict[1+tableNumber], tableDict[tableNumber], -50);
-	rotate(0);
+	reverse(tableDict[1+tableNumber], tableDict[tableNumber], 50);
 }
 
 void goToTable(const int tableNumber, int* tableDict) {
