@@ -3,43 +3,99 @@ This file contains all functions used to deliver the drink onto the table
 */
 
 // constant for distance from UltraSonic sensor to from of the gripper
-const float DIST_TO_GRIPPER = 11.75;
-const float GRIPPER_LENGTH = 6.75;
-const int LIFT_ENC_VALUE = 1800;
-const int PLACE_CUP_VALUE = 40;
+const int LIFT_ENC_VALUE = 20000;
+const int OPEN_ENC_VALUE = 3000;
 
+void configureAllSensors()
+{
+
+	SensorType[S1] = sensorEV3_Color;
+	wait1Msec(50);
+	SensorMode[S1] = modeEV3Color_Color;
+	wait1Msec(50);
+
+	SensorType[S2] = sensorEV3_Gyro;
+	wait1Msec(50);
+	SensorMode[S2] = modeEV3Gyro_Calibration;
+	wait1Msec(100);
+	SensorMode[S2] = modeEV3Gyro_RateAndAngle;
+	wait1Msec(50);
+
+	SensorType[S3] = sensorEV3_Ultrasonic;
+
+	SensorType[S4] = sensorEV3_IRSensor;
+	wait1Msec(50);
+	SensorMode[S4] = modeEV3IR_Calibration;
+	wait1Msec(100);
+	SensorMode[S4] = modeEV3IR_Seeker;
+	wait1Msec(1000);
+
+}
 
 void liftGripper(bool up)
 {
-    int direction = 1;
-
-    if(up)
-    {
-        motor[motorB] = 100;
-        while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
-        motor[motorB] = 0;
-    }
-
-    else
-    {
-        motor[motorB] = -100;
-        while(nMotorEncoder[motorB] > 0) {}
-        motor[motorB] = 0;
-    }
+	if(up)
+	{
+	nMotorEncoder[motorB] = 0;
+	motor[motorB] = 100;
+	while(nMotorEncoder[motorB] < LIFT_ENC_VALUE) {}
+	motor[motorB] = 0;
 }
+	else if(!up)
+	{
+	motor[motorB] = -100;
+	while(nMotorEncoder[motorB] > LIFT_ENC_VALUE) {}
+	motor[motorB] = 0;
+}
+
+}
+
+void openGripper(bool open)
+{
+	if(open)
+	{
+		nMotorEncoder[motorA] = 0;
+		motor[motorA] = 100;
+		while(nMotorEncoder[motorA] < OPEN_ENC_VALUE) {}
+		motor[motorA] = 0;
+	}
+
+	if(!open)
+	{
+		motor[motorA] = -100;
+		while(nMotorEncoder[motorA] > 0) {}
+		motor[motorA] = 0;
+	}
+
+}
+
+task main()
+{
+	liftGripper(1);
+	liftGripper(0);
+	openGripper(1);
+	
+}
+
+
 
 void placeDrink()
 {
-    liftGripper(1);
-    drive(10);
-    while(getSensorValue[S3] > (DIST_TO_GRIPPER - GRIPPER_LENGTH)) {}
-    drive(0);
-    motor[motorB] = -10;
-    while(nMotorEncoder[motorB] < LIFT_ENC_VALUE - PLACE_CUP_VALUE) {}
-    motor[motorB] = 0;
-    wait1MSec(100);
-    motor[motorC] = -10;
-    wait1MSec(100);
-    driveDistance(-10, 100)
     liftGripper(0);
+	wait1Msec(100);
+    openGripper(1);
+	wait1Msec(100);
 }
+
+/*
+	configureAllSensors();
+	nMotorEncoder[motorB] = 0;
+	motor[motorB] = 100;
+	while(!getButtonPress(buttonEnter)){}
+	while(getButtonPress(buttonEnter)){}
+	motor[motorB] = 0;
+	displayString(3, "Encoder Value: %d", nMotorEncoder[motorB]);
+	wait1Msec(10000);*/
+
+
+
