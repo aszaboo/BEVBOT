@@ -12,28 +12,22 @@ const int LIFT_ENC_VALUE = 1800;
 const int PLACE_CUP_VALUE = 40;
 
 
-int tableDict[10] = {TABLE_RADIUS, -60, TABLE_RADIUS, -30, TABLE_RADIUS, 0, TABLE_RADIUS, 30, TABLE_RADIUS, 60};
+int tableDict[6] = {TABLE_RADIUS, -60, TABLE_RADIUS, 0, TABLE_RADIUS, 60};
 
 
 // function prototypes
 
 // standard functions
-
-//drives in a given heading, for a given distance, with given standard motor duty.
 void drive(int heading, int distance, int speed);
-
+void goToTable(const int tableNumber, int* tableDict);
+void returnToBase(const int tableNumber, int*tableDict);
+void rotate(int heading);
 
 // location functions
 
 // determines the table number with the active beacon
 
 int locateTable(int beaconSensorValue);
-
-// drives the robot to a table ready to order
-void goToTable(const int tableNumber, int* tableDict);
-
-// returns the robot to the base location
-void returnToBase(int tableNumber);
 
 // order functions
 
@@ -68,7 +62,7 @@ task main()
         takeOrder();
 
         // returining to the table
-        returnToBase(table_number);
+        returnToBase(table_number, tableDict);
 
         // wait for order completion'
         orderUp(table_number, tableDict);
@@ -77,7 +71,7 @@ task main()
         placeDrink();
 
         // returning to base
-        returnToBase(table_number);
+        returnToBase(table_number, tableDict);
 
         //reset timer
         clearTimer(T1);
@@ -86,28 +80,6 @@ task main()
 }
 
 // standard functions
-
-void drive(int heading, int distance, int speed)
-{
-	float duty = speed;
-
-	float Kp =	2;
-
-	float error;
-
-	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
-	{
-		error=getGyroDegrees(S2)-heading;
-
-		float correction = (Kp*error)*-1;
-		float power_left = -(duty + correction);
-		float power_right = -(duty - correction);
-
-		motor[motorC] = power_left;
-		motor[motorD] = power_right;
-
-	}
-}
 
 // location functions
 
@@ -134,16 +106,6 @@ int locateTable(int beaconSensorValue)
     return table_number;
 }
 
-
-void goToTable(const int tableNumber, int* tableDict) {
-	drive(tableDict[1+2*tableNumber], tableDict[2*tableNumber], 60);
-}
-
-void returnToBase(int tableNumber)
-{
-        drive(180+tableDict[1+2*tableNumber], tableDict[2*tableNumber], 60);
-}
-
 // takes a persons order and returns the order as a string
 string takeOrder()
 {
@@ -152,7 +114,7 @@ string takeOrder()
 
     displayString(3, "Please scan your order");
 
-    do 
+    do
     {
     if(SensorValue[S1] == (int)colorRed) {
     order_kind = "Coke";
@@ -168,24 +130,24 @@ string takeOrder()
     else
     displayString(3, "Sorry we do not have that drink");
     } while (order_kind != "Coke" || order_kind != "Raspberry Lemonade" || order_kind != "Lemonade");
-      
+
     return order_kind;
-    
+
 }
 
 
 // makes a and delivers the order to the table
-void orderUp(int tableNumber, string order_kind) 
+void orderUp(int tableNumber, string order_kind, int* tableDict)
 {
         // wait for enter button to be released (p2)
-	while(!getButtonPress(buttonEnter)) 
+	while(!getButtonPress(buttonEnter))
   {
     displayString(3, "%s", order_kind);
 	}
 
 	while(getButtonPress(buttonEnter)) {}
-  wait1MSec(200);
-  goToTable(tableNumber);
+  wait1Msec(200);
+  goToTable(tableNumber, tableDict);
 }
 
 // gripper functions
@@ -216,4 +178,75 @@ void placeDrink()
     motor[motorB] = 0;
     wait1Msec(100);
     liftGripper(false);
+}
+
+
+void drive(int heading, int distance, int speed)
+{
+
+	nMotorEncoder[motorC] = nMotorEncoder[motorD] = 0;
+	float duty = speed;
+
+	const float Kp =	0.5;
+
+	float error;
+
+	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
+	{
+		error=getGyroHeading(S2)-heading;
+
+		float correction = (Kp*error)*-1;
+		float power_left = -(duty + correction);
+		float power_right = -(duty - correction);
+
+		motor[motorC] = power_left;
+		motor[motorD] = power_right;
+
+	}
+	motor[motorC] = motor[motorD] = 0;
+}
+
+void reverse(int heading, int distance, int speed)
+{
+
+	nMotorEncoder[motorC] = nMotorEncoder[motorD] = 0;
+	float duty = speed;
+
+	const float Kp =	0.5;
+
+	float error;
+
+	while ((abs(nMotorEncoder[motorC] + nMotorEncoder[motorD])/2) < distance*180/PI)
+	{
+		error= -(getGyroHeading(S2)-heading);
+
+		float correction = (Kp*error)*-1;
+		float power_left = duty + correction;
+		float power_right = duty - correction;
+
+		motor[motorC] = power_left;
+		motor[motorD] = power_right;
+
+	}
+	motor[motorC] = motor[motorD] = 0;
+}
+
+void rotate(int heading)
+{
+	motor[motorC] = -20;
+	motor[motorD] = 20;
+	while (getGyroHeading(S2)+180 != heading+179)
+	{}
+	motor[motorC] = motor[motorD] = 0;
+}
+
+void returnToBase(const int tableNumber, int*tableDict)
+{
+	reverse(tableDict[1+tableNumber], tableDict[tableNumber], 50);
+	rotate(0);
+}
+
+void goToTable(const int tableNumber, int* tableDict) {
+	rotate(tableDict[1+tableNumber]);
+	drive(tableDict[1+tableNumber], tableDict[tableNumber], 50);
 }
