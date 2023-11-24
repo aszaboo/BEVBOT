@@ -1,10 +1,7 @@
-const float WHEEL_RAD = 2.75;
 const int TABLE_RADIUS = 100.0;
 const int TIME_OUT = 600000;
 const int LIFT_ENC_VALUE = 20000;
 const int OPEN_ENC_VALUE = 3000;
-
-int tableDict[6] = {TABLE_RADIUS, -60, TABLE_RADIUS, 0, TABLE_RADIUS, 60};
 
 void drive(int heading, int distance, int speed);
 void goToTable(const int tableNumber, int* tableDict);
@@ -41,17 +38,20 @@ task main()
 	SensorMode[S4] = modeEV3IR_Seeker;
 	wait1Msec(1000);
 
-	while(true)
+	int tableDict[6] = {TABLE_RADIUS, -60, TABLE_RADIUS, 0, TABLE_RADIUS, 60};
+
+	while(!(SensorValue[S1] == (int)colorBlack))
 	{
+
 		// while there is no IRBeacon signal do nothing
-		while(!getIRBeaconDirection(S4)) {}
+		while(getIRBeaconStrength(S4)<5) {}
 
 		// locating and driving to table
 		int table_number = locateTable(getIRBeaconDirection(S4));
 		goToTable(table_number, tableDict);
 
 		// taking the customers order
-		char* order = takeOrder();
+		string order = takeOrder();
 
 		// returining to the table
 		returnToBase(table_number, tableDict);
@@ -77,9 +77,9 @@ task main()
 int locateTable(int beaconSensorValue)
 {
 	if (beaconSensorValue < -9)
-		return 0;
-	if (beaconSensorValue > 9)
 		return 2;
+	if (beaconSensorValue > 9)
+		return 1;
 	else
 		return 1;
 }
@@ -108,12 +108,12 @@ char* takeOrder()
 		{
 			order_kind = "Dr Pepper";
 		}
-		else
-		{
-			displayString(3, "Sorry, we do not have that drink");
-			wait1Msec(1000);
-		}
-	} while (order_kind != "Coffee" || order_kind != "Margherita" || order_kind != "Dr Pepper");
+	} while (order_kind != "Coffee" && order_kind != "Margherita" && order_kind != "Dr Pepper");
+
+	displayString(3, "                   ");
+	displayString(4, "                   ");
+	displayString(5, "                   ");
+	displayString(6, "                   ");
 	return order_kind;
 }
 
@@ -124,7 +124,7 @@ void orderUp(int tableNumber, char* order_kind, int* tableDict)
 	// wait for enter button to be released (p2)
 	while(!getButtonPress(buttonEnter))
 	{
-		displayString(3, "%s", order_kind);
+		displayString(3, order_kind);
 	}
 
 	while(getButtonPress(buttonEnter)) {}
