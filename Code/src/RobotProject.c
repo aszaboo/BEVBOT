@@ -122,12 +122,13 @@ char* takeOrder()
 void orderUp(int tableNumber, char* order_kind, int* tableDict)
 {
 	// wait for enter button to be released (p2)
-	while(!getButtonPress(buttonEnter))
+	while(!getButtonPress(buttonEnter) && SensorValue[S1] != (int)colorBlack)
 	{
 		displayString(3, order_kind);
 	}
 
-	while(getButtonPress(buttonEnter)) {}
+	while(getButtonPress(buttonEnter) || SensorValue[S1] != (int)colorBlack) {}
+	openGripper(false);
 	wait1Msec(200);
 	goToTable(tableNumber, tableDict);
 }
