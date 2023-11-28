@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/alexszabo/Projects/BEVBOT/BEVBOT/Code/include",
-      "program": "/Users/alexszabo/Projects/BEVBOT/BEVBOT/Code/include/build/Debug/outDebug"
+      "cwd": "/Users/alexszabo/Projects/BEVBOT/BEVBOT/Code/src",
+      "program": "/Users/alexszabo/Projects/BEVBOT/BEVBOT/Code/src/build/Debug/outDebug"
     }
   ]
 }
