@@ -1,3 +1,5 @@
+// note motors flipped
+
 const int TABLE_RADIUS = 60.0;
 const int TIME_OUT = 600000;
 const int LIFT_ENC_VALUE = 20000;
@@ -13,6 +15,7 @@ void orderUp(int tableNumber, char* order_kind, int* tableDict);
 void liftGripper(bool dir);
 void openGripper(bool open);
 void placeDrink();
+void shutDownProcedure();
 
 task main()
 {
@@ -257,7 +260,21 @@ void returnToBase(const int tableNumber, int*tableDict)
 	reverse(tableDict[1+tableNumber], tableDict[tableNumber], 50);
 }
 
+returnToBase();
+{
+	motor[motorC] = motor[motorD] = 100; 
+	while(nMotorEncoder[motorC] > 0) {}
+	motor[motorC] = motor[motorD] = 0; 
+	rotate(0);
+}
+
 void goToTable(const int tableNumber, int* tableDict) {
 	rotate(tableDict[1+tableNumber]);
 	drive(tableDict[1+tableNumber], tableDict[tableNumber], 50);
+}
+
+void shutDownProcedure();
+{
+	returnToBase();
+	liftGripper(0);	
 }
