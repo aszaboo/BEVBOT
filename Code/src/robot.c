@@ -260,7 +260,7 @@ void returnToBase(const int tableNumber, int*tableDict)
 	reverse(tableDict[1+tableNumber], tableDict[tableNumber], 50);
 }
 
-returnToBase();
+returnToBase2();
 {
 	motor[motorC] = motor[motorD] = 100; 
 	while(nMotorEncoder[motorC] > 0) {}
@@ -275,6 +275,6 @@ void goToTable(const int tableNumber, int* tableDict) {
 
 void shutDownProcedure();
 {
-	returnToBase();
+	returnToBase2();
 	liftGripper(0);	
 }
