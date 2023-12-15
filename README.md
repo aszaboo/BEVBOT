@@ -1,2 +1,2 @@
 # BEVBOT
-Project description and code for BEVBOT
+BEVBOT is a drink delivery robot created for the entertainment industry.
